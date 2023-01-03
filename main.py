@@ -31,6 +31,8 @@ class Game:
 
         # user input
         self.user_text = ""
+        self.new_line = ""
+        self.input_list = []
 
     def play(self):
         # plays the game
@@ -59,7 +61,11 @@ class Game:
             self.user_text = self.user_text[:-1]
 
         else:
-            self.user_text += event.unicode
+            if self.continue_game:
+                self.user_text += event.unicode
+
+            if not self.continue_game:
+                self.new_line += event.unicode
 
     def track_time(self):
         self.time += 1
@@ -75,6 +81,8 @@ class Game:
         #    self.draw_intro()
 
         self.draw_inputbox()
+        if not self.continue_game:
+            self.draw_new_line()
 
         pygame.display.update()
 
@@ -87,20 +95,52 @@ class Game:
 
     def draw_inputbox(self):
 
-        font = pygame.font.SysFont("", 30)
-        input_rect = pygame.Rect(200, 200, 500, 32)
+        font = pygame.font.Font("./font/Andika-Regular.ttf", 30)
+        input_rect = pygame.Rect(200, 200, 30, 50)
         color_active = pygame.Color("#665c54")
         color_passive = pygame.Color("#ebdbb2")
-        color = color_passive
+        color = pygame.Color("white")
 
-        x = self.surface.get_width() // 2 - input_rect.width // 2
+        x = 100
         y = self.surface.get_height() - 200
         input_rect.x = x
         input_rect.y = y
 
         text_box = font.render(self.user_text, True, color_active)
 
-        location = input_rect.x + 5, input_rect.y + 5
+        location = input_rect.x + 5, input_rect.y
+
+        input_rect.w = max(input_rect.w, text_box.get_width() + 10)
+        pygame.draw.rect(self.surface, color_passive, input_rect)
+
+        if text_box.get_width() >= self.surface.get_width() - 200:
+            if self.continue_game:
+                self.new_line += self.user_text.split()[-1]
+                new_user = self.user_text.split()[:-1]
+                self.user_text = " ".join(new_user)
+            self.continue_game = False
+        self.surface.blit(text_box, location)
+
+        # When the text box width reaches a certain width, then we
+        # we have to go to a new line beneath it.
+        # create another textbox, with it's user text being split
+        # The continue on with a different position
+
+    def draw_new_line(self):
+        font = pygame.font.Font("./font/Andika-Regular.ttf", 30)
+        input_rect = pygame.Rect(200, 200, 30, 50)
+        color_active = pygame.Color("#665c54")
+        color_passive = pygame.Color("#ebdbb2")
+        color = pygame.Color("white")
+
+        x = 100
+        y = self.surface.get_height() - 140
+        input_rect.x = x
+        input_rect.y = y
+
+        text_box = font.render(self.new_line, True, color_active)
+
+        location = input_rect.x + 5, input_rect.y
 
         input_rect.w = max(input_rect.w, text_box.get_width() + 10)
         pygame.draw.rect(self.surface, color_passive, input_rect)
