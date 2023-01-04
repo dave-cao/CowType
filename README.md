@@ -6,7 +6,7 @@
 
 ![Cow Type Gif](./assets/cowtype.gif)
 
-- [Live](youtube video) demonstration video.
+- [Live](https://youtu.be/lXkNbTZ2OCQ) demonstration video.
 - [Demo](https://replit.com/@KingCao/CowType?lite=1&outputonly=1) the Project.
 
 
@@ -65,7 +65,7 @@ ctl + c
 # or press x button
 ```
 
-_For a more comprehensive example of using this application, refer to this [video](example video here)_
+_For a more comprehensive example of using this application, refer to this [video](https://youtu.be/lXkNbTZ2OCQ)_
 
 
 
