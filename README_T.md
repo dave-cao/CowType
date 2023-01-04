@@ -40,7 +40,7 @@ python -m ensurepip --upgrade
 
 1. Clone the repo
 ```sh
-git clone git@github.com:dave-cao/Pomodoro-Cli.git
+git clone https://github.com/dave-cao/CowType.git
 ```
 3. Install pip packages
 ```sh
@@ -50,24 +50,19 @@ pip install -r requirements.txt
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Example images can also go here...
-
-1. Go into the `config.py` file and configure the settings to your liking. The default is a 50 minute pomodoro with 10 minute short breaks and a 30 minute long break. File paths can also be configured here.
-
-![Pomo Config Image](img/image3.png)
-
-2. Run the application
+1. Run the application
 ```sh
 python3 main.py
 ```
+2. You should be presented with the following box.
+![Type begin](img/image0.png)
 
-![Pomo Menu Image](img/image0.png)
-![Pomo Session Image](img/image2.png)
-![Daily Stats Image](img/image1.png)
+3. Simply type and test your speed!
 
-3. Exit application
+4. Exit application
 ```
 ctl + c
+# or press x button
 ```
 
 _For a more comprehensive example of using this application, refer to this [video](example video here)_
@@ -78,7 +73,12 @@ _For a more comprehensive example of using this application, refer to this [vide
 <!-- ROADMAP -->
 ## Roadmap
 
-Future plans...
+Currently there is no future plans for this project. However, there are some things I thought of
+that might be interesting to add:
+1. Have the input text overlay the prompt text
+2. When a word is typed incorrectly, instead of having everything turn red, make only the word turn red
+3. You can't press and hold backspace, you have to press it one at a time
+
 
 
 <!-- CONTRIBUTING -->

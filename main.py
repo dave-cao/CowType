@@ -30,6 +30,7 @@ class Game:
         self.surface = surface
         self.bg_color = pygame.Color("#262626")
         self.FPS = 60
+        self.intro = 60
         self.game_Clock = pygame.time.Clock()
         self.close_clicked = False
         self.continue_game = True
@@ -115,7 +116,7 @@ class Game:
             if event.type == pygame.QUIT:
                 self.close_clicked = True
 
-            if self.continue_game:
+            if self.continue_game and self.intro <= 0:
                 if event.type == pygame.KEYDOWN:
                     self.check_newline()
                     self.handle_keydown(event)
@@ -285,7 +286,18 @@ class Game:
             self.draw_continue()
         self.draw_sentence()
 
+        if self.intro > 0:
+            self.draw_intro()
+            self.intro -= 1
+
         pygame.display.update()
+
+    def draw_intro(self):
+        image = pygame.image.load("./assets/cowtype.png")
+        image_width = self.surface.get_width()
+        image_height = self.surface.get_height()
+        image = pygame.transform.scale(image, (image_width, image_height))
+        self.surface.blit(image, (0, 0))
 
     def draw_continue(self):
         """Draws the restart prompt."""
