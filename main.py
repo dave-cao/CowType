@@ -1,4 +1,6 @@
 # Typing game
+import random
+
 import pygame
 
 
@@ -30,26 +32,60 @@ class Game:
         self.second = 0
         self.start_timer = False
 
-        # user input
-        # self.user_text = ""
-        # self.new_line = ""
         self.input_offset = self.surface.get_height() // 2
-        self.input_x = 100
+        self.input_x = 20
         self.input_list = [Input(self.input_x, self.input_offset, self.surface)]
+        self.color_active = pygame.Color("#665c54")
+        self.font = pygame.font.Font("./font/Andika-Regular.ttf", 30)
+
+        self.sentence = self.get_sentence()
+        self.popped_words = []
+
+        # calcualting
+        self.total_keys_pressed = 0
+        self.WPM = 0
+
+    def get_sentence(self):
+        # get a random sentence
+        with open("./sentences.txt", "r") as file:
+            sentences = file.readlines()
+
+        random_sentence = random.choice(sentences)
+        return random_sentence
+
+    def blit_text(self, surface, text, pos, font):
+        words = [
+            word.split(" ") for word in text.splitlines()
+        ]  # 2D array where each row is a list of words.
+        space = font.size(" ")[0]  # The width of a space.
+        max_width, max_height = surface.get_size()
+        x, y = pos
+        for line in words:
+            for word in line:
+                word_surface = font.render(word, 0, self.color_active)
+                word_width, word_height = word_surface.get_size()
+                if x + word_width >= max_width:
+                    x = pos[0]  # Reset the x.
+                    y += word_height  # Start on new row.
+                surface.blit(word_surface, (x, y))
+                x += word_width + space
+            x = pos[0]  # Reset the x.
+            y += word_height  # Start on new row.
+
+    def draw_sentence(self):
+        self.blit_text(self.surface, self.sentence, (20, 20), self.font)
 
     def play(self):
         # plays the game
         while not self.close_clicked:
 
             # play frame
-            self.handle_events()
             self.draw()
+            self.handle_events()
 
             # Start the timer when a key is pressed
             if self.start_timer:
                 self.track_time()
-            if self.continue_game:
-                pass
 
             self.game_Clock.tick(self.FPS)  # run at most with FPS
 
@@ -59,19 +95,31 @@ class Game:
             if event.type == pygame.QUIT:
                 self.close_clicked = True
 
-            if event.type == pygame.KEYDOWN:
-                self.check_newline()
-                self.handle_keydown(event)
-                # start the timer when a key is pressed
-                if not self.start_timer:
-                    self.start_timer = True
+            if self.continue_game:
+                if event.type == pygame.KEYDOWN:
+                    self.total_keys_pressed += 1
+                    self.check_newline()
+                    self.handle_keydown(event)
+                    # start the timer when a key is pressed
+                    if not self.start_timer:
+                        self.start_timer = True
 
     def handle_keydown(self, event):
         if event.key == pygame.K_BACKSPACE:
             self.handle_backspace(event)
 
+        elif event.key == pygame.K_RETURN:
+            self.handle_enter(event)
         else:
             self.input_list[-1].update_content(event.unicode)
+
+    def handle_enter(self, event):
+        self.start_timer = False
+        self.continue_game = False
+        self.update_wpm()
+        print(self.WPM, " AVERAGE WPM")
+        print(self.get_wpm(), " RAW WPM")
+        print(self.get_accuracy(), " ACCURACY")
 
     def handle_backspace(self, event):
         # handles the backspace event
@@ -81,13 +129,13 @@ class Game:
             self.input_list.pop()
 
     def check_newline(self):
-        end_of_type_screen = 200
+        end_of_type_screen = 20
         for user_input in self.input_list:
             if (
                 user_input.get_width() > self.surface.get_width() - end_of_type_screen
                 and user_input.check_on()
             ):
-                self.input_offset += 80
+                self.input_offset += 50
                 self.input_list.append(
                     Input(self.input_x, self.input_offset, self.surface)
                 )
@@ -135,6 +183,7 @@ class Game:
         # self.draw_inputbox()
         # if not self.continue_game:
         #     self.draw_new_line()
+        self.draw_sentence()
 
         for user_input in self.input_list:
             user_input.draw_content()
@@ -147,6 +196,35 @@ class Game:
         image_height = self.surface.get_height()
         image = pygame.transform.scale(image, (image_width, image_height))
         self.surface.blit(image, (0, 0))
+
+    def get_wpm(self):
+        minute = self.second / 60
+        WPM = (self.total_keys_pressed / 5) / minute
+        return WPM
+
+    def get_accuracy(self):
+        self.sentence
+        sentence = ""
+        for user_input in self.input_list:
+            sentence += user_input.get_content() + " "
+
+        sentence = sentence.strip()
+
+        correct = 0
+
+        # If the user types more than what they are supposed to
+        try:
+            for i, char in enumerate(sentence):
+                if char == self.sentence[i]:
+                    correct += 1
+        except IndexError:
+            print("Went over")
+
+        return correct / self.total_keys_pressed
+
+    def update_wpm(self):
+        average_wpm = self.get_wpm() * self.get_accuracy()
+        self.WPM = round(average_wpm)
 
 
 class Input:
@@ -173,12 +251,12 @@ class Input:
         # input
 
         # blit the text box
-        text_box = self.font.render(self.content, True, self.color_active)
+        text_box = self.font.render(self.content, True, self.color_passive)
         location = self.rect.x + 5, self.rect.y
 
         # draw the rect
         self.rect.width = text_box.get_width() + 10
-        pygame.draw.rect(self.surface, self.color_passive, self.rect)
+        pygame.draw.rect(self.surface, self.color_active, self.rect)
 
         # blit the text after so it shows up first
         self.surface.blit(text_box, location)
