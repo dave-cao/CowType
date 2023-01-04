@@ -131,7 +131,25 @@ class Game:
     def restart_game(self, event):
         """Restarts the game"""
         if event.key == pygame.K_RETURN:
-            main()
+            # Keeping track of time
+            self.time = 0
+            self.second = 0
+            self.start_timer = False
+
+            # Input variables
+            self.input_offset = self.surface.get_height() // 2
+            self.input_x = 20
+            self.input_list = [Input(self.input_x, self.input_offset, self.surface)]
+            self.raw_text = ""
+            self.sentence = self.get_sentence()
+
+            # calculating WPM and acc
+            self.total_keys_pressed = 0
+            self.WPM = 0
+            self.raw_wpm = 0
+            self.accuracy = 0
+
+            self.continue_game = True
 
     def handle_keydown(self, event):
         """Handles when user presses a key.
@@ -140,6 +158,7 @@ class Game:
         """
         if event.key == pygame.K_BACKSPACE:
             self.handle_backspace(event)
+            self.check_wrong_char()
 
         elif event.key == pygame.K_RETURN:
             self.handle_enter(event)
