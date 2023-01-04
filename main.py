@@ -49,7 +49,7 @@ class Game:
         # text color and font
         self.color_active = pygame.Color("#ebdbb2")
         self.color_passive = pygame.Color("#665c54")
-        self.font = pygame.font.Font("./font/Andika-Regular.ttf", 30)
+        self.font = pygame.font.Font("./assets/font/Andika-Regular.ttf", 30)
 
         # calculating WPM and acc
         self.total_keys_pressed = 0
@@ -350,7 +350,7 @@ class Input:
         self.x = x
         self.y = y
 
-        self.font = pygame.font.Font("./font/Andika-Regular.ttf", 30)
+        self.font = pygame.font.Font("./assets/font/Andika-Regular.ttf", 30)
         self.rect = pygame.Rect(x, y, width, height)
         self.cursor = pygame.Rect(x, y, 10, height)
 
