@@ -40,10 +40,13 @@ class Game:
 
         self.sentence = self.get_sentence()
         self.popped_words = []
+        self.raw_text = ""
 
         # calcualting
         self.total_keys_pressed = 0
         self.WPM = 0
+        self.raw_wpm = 0
+        self.accuracy = 0
 
     def get_sentence(self):
         # get a random sentence
@@ -73,7 +76,7 @@ class Game:
             y += word_height  # Start on new row.
 
     def draw_sentence(self):
-        self.blit_text(self.surface, self.sentence, (20, self.input_offset), self.font)
+        self.blit_text(self.surface, self.sentence, (20, 20), self.font)
 
     def play(self):
         # plays the game
@@ -97,12 +100,19 @@ class Game:
 
             if self.continue_game:
                 if event.type == pygame.KEYDOWN:
-                    self.total_keys_pressed += 1
                     self.check_newline()
                     self.handle_keydown(event)
                     # start the timer when a key is pressed
                     if not self.start_timer:
                         self.start_timer = True
+
+            else:
+                if event.type == pygame.KEYDOWN:
+                    self.restart_game(event)
+
+    def restart_game(self, event):
+        if event.key == pygame.K_RETURN:
+            main()
 
     def handle_keydown(self, event):
         if event.key == pygame.K_BACKSPACE:
@@ -110,13 +120,19 @@ class Game:
 
         elif event.key == pygame.K_RETURN:
             self.handle_enter(event)
+        elif event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
+            print("", end="")
         else:
             self.input_list[-1].update_content(event.unicode)
+            self.raw_text += event.unicode
+            self.total_keys_pressed += 1
+            self.check_wrong_char()
 
     def handle_enter(self, event):
         self.start_timer = False
         self.continue_game = False
         self.update_wpm()
+        self.accuracy = self.get_accuracy()
         print(self.WPM, " AVERAGE WPM")
         print(round(self.get_wpm()), " RAW WPM")
         print(round(self.get_accuracy() * 100), " ACCURACY")
@@ -125,8 +141,28 @@ class Game:
         # handles the backspace event
         if self.input_list[0].get_content() != " ":
             self.input_list[-1].delete_char()
+            self.raw_text = self.raw_text[:-1]
         if not self.input_list[-1].get_content() and self.input_list[0].get_content():
             self.input_list.pop()
+            self.input_list[-1].turn_on_cursor()
+            self.input_list[-1].switch_off_to_on()
+            self.input_offset -= 50
+
+    def check_wrong_char(self):
+
+        try:
+            for i, char in enumerate(self.raw_text):
+                if char == self.sentence[i]:
+                    for _list in self.input_list:
+                        _list.set_correct()
+
+            for i, char in enumerate(self.raw_text):
+                if char != self.sentence[i]:
+                    for _list in self.input_list:
+                        _list.set_incorrect()
+
+        except IndexError:
+            print("Too many characters")
 
     def check_newline(self):
         end_of_type_screen = 20
@@ -151,7 +187,7 @@ class Game:
         # get the last word of current input and give to next input
         # update the content of the most recent input with the last word
         # of previous input (current)
-        current_last_word = user_input.get_content().split()[-1]
+        current_last_word = user_input.get_content().split(" ")[-1]
         without_last_word = " ".join(user_input.get_content().split()[:-1])
         # set the current userinput to delete the last word
         original_input = user_input.get_content()
@@ -182,15 +218,35 @@ class Game:
         # if self.second < 2:
         #    self.draw_intro()
 
-        # self.draw_inputbox()
-        # if not self.continue_game:
-        #     self.draw_new_line()
-        self.draw_sentence()
-
         for user_input in self.input_list:
             user_input.draw_content()
 
+        # self.draw_inputbox()
+        if not self.continue_game:
+            self.draw_score()
+            self.draw_continue()
+        self.draw_sentence()
+
         pygame.display.update()
+
+    def draw_continue(self):
+        string = "Press Enter to restart"
+        text_box = self.font.render(string, True, pygame.Color("#665c54"))
+
+        x = self.surface.get_width() // 2 - text_box.get_width() // 2
+        y = self.surface.get_height() // 2 - text_box.get_height() // 2 - 50
+        location = x, y
+        self.surface.blit(text_box, location)
+
+    def draw_score(self):
+        string = f"WPM: {self.WPM} | Acc: {round(self.accuracy * 100)}% | Raw: {self.raw_wpm}"
+        text_box = self.font.render(string, True, pygame.Color("#ff8035"))
+
+        x = self.surface.get_width() // 2 - text_box.get_width() // 2
+        y = self.surface.get_height() - 100
+
+        location = (x, y)
+        self.surface.blit(text_box, location)
 
     def draw_intro(self):
         image = pygame.image.load("./type-speed-open.png")
@@ -205,12 +261,7 @@ class Game:
         return WPM
 
     def get_accuracy(self):
-        self.sentence
-        sentence = ""
-        for user_input in self.input_list:
-            sentence += user_input.get_content() + " "
-
-        sentence = sentence.strip()
+        sentence = self.raw_text
 
         correct = 0
 
@@ -227,6 +278,7 @@ class Game:
     def update_wpm(self):
         average_wpm = self.get_wpm() * self.get_accuracy()
         self.WPM = round(average_wpm)
+        self.raw_wpm = round(self.get_wpm())
 
 
 class Input:
@@ -285,6 +337,9 @@ class Input:
     def switch_on_to_off(self):
         self.on = False
 
+    def switch_off_to_on(self):
+        self.on = True
+
     def get_content(self):
         return self.content
 
@@ -293,6 +348,15 @@ class Input:
 
     def turn_off_cursor(self):
         self.end_of_line = True
+
+    def turn_on_cursor(self):
+        self.end_of_line = False
+
+    def set_incorrect(self):
+        self.color_passive = pygame.Color("#cc241d")
+
+    def set_correct(self):
+        self.color_passive = pygame.Color("#ebdbb2")
 
 
 if __name__ == "__main__":
