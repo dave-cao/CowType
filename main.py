@@ -29,7 +29,7 @@ class Game:
 
         # Keeping track of time
         self.time = 0
-        self.second = 0
+        self.second = 1
         self.start_timer = False
 
         self.input_offset = self.surface.get_height() // 2
@@ -73,7 +73,7 @@ class Game:
             y += word_height  # Start on new row.
 
     def draw_sentence(self):
-        self.blit_text(self.surface, self.sentence, (20, 20), self.font)
+        self.blit_text(self.surface, self.sentence, (20, self.input_offset), self.font)
 
     def play(self):
         # plays the game
@@ -118,8 +118,8 @@ class Game:
         self.continue_game = False
         self.update_wpm()
         print(self.WPM, " AVERAGE WPM")
-        print(self.get_wpm(), " RAW WPM")
-        print(self.get_accuracy(), " ACCURACY")
+        print(round(self.get_wpm()), " RAW WPM")
+        print(round(self.get_accuracy() * 100), " ACCURACY")
 
     def handle_backspace(self, event):
         # handles the backspace event
@@ -135,6 +135,8 @@ class Game:
                 user_input.get_width() > self.surface.get_width() - end_of_type_screen
                 and user_input.check_on()
             ):
+                # turns off the cursor
+                user_input.turn_off_cursor()
                 self.input_offset += 50
                 self.input_list.append(
                     Input(self.input_x, self.input_offset, self.surface)
@@ -236,6 +238,7 @@ class Input:
 
         self.font = pygame.font.Font("./font/Andika-Regular.ttf", 30)
         self.rect = pygame.Rect(x, y, width, height)
+        self.cursor = pygame.Rect(x, y, 10, height)
 
         self.surface = surface
         self.color_active = pygame.Color("#665c54")
@@ -245,6 +248,7 @@ class Input:
         self.content = ""
 
         self.on = True
+        self.end_of_line = False
 
     def draw_content(self):
 
@@ -256,7 +260,12 @@ class Input:
 
         # draw the rect
         self.rect.width = text_box.get_width() + 10
-        pygame.draw.rect(self.surface, self.color_active, self.rect)
+        pygame.draw.rect(self.surface, self.bg_color, self.rect)
+
+        # draw a cursor
+        if not self.end_of_line:
+            self.cursor.x = self.rect.width + 16
+            pygame.draw.rect(self.surface, self.color_active, self.cursor)
 
         # blit the text after so it shows up first
         self.surface.blit(text_box, location)
@@ -281,6 +290,9 @@ class Input:
 
     def set_content(self, content):
         self.content = content
+
+    def turn_off_cursor(self):
+        self.end_of_line = True
 
 
 if __name__ == "__main__":
