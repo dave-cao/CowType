@@ -250,7 +250,7 @@ class Game:
 
         """
         current_last_word = user_input.get_content().split(" ")[-1]
-        without_last_word = " ".join(user_input.get_content().split()[:-1])
+        without_last_word = " ".join(user_input.get_content().split(" ")[:-1])
 
         # set the current userinput to delete the last word
         original_input = user_input.get_content()
