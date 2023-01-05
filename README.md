@@ -58,8 +58,9 @@ python3 main.py
 ![Type begin](img/image0.png)
 
 3. Simply type and test your speed!
+4. Press `enter` to finish your test. Press `enter` again to restart the test.
 
-4. Exit application
+5. Exit application
 ```
 ctl + c
 # or press x button
