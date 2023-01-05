@@ -206,6 +206,8 @@ class Game:
             self.input_list[-1].switch_off_to_on()
             self.input_offset -= 50
 
+            self.raw_text = self.raw_text[:-1]
+
     def check_wrong_char(self):
         """Checks if a wrong character is pressed. If so, then give colour warning"""
         try:
